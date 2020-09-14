@@ -32,7 +32,7 @@
 #include <string.h>
 
 // Descomente o define abaixo, para desabilitar o Bluetooth e utilizar modo Serial via Cabo
-//#define DEBUG_SERIAL
+#define DEBUG_SERIAL
 
 #define DEBUG_SERIAL
 #ifdef DEBUG_SERIAL
@@ -42,9 +42,13 @@
 #endif
 
 // pc30
-#define but1_pio PIOC
-#define but1_pio_id ID_PIOC
-#define but1_mask 1 << 30
+#define play_pio PIOC
+#define play_pio_id ID_PIOC
+#define play_mask 1 << 30
+
+#define next_pio PIOA
+#define next_pio_id ID_PIOA
+#define next_mask 1 << 19
 
 volatile long g_systimer = 0;
 
@@ -125,7 +129,7 @@ int hc05_server_init(void) {
 
 int main (void)
 {
-	board_init();
+	board_init();	
 	sysclk_init();
 	delay_init();
 	SysTick_Config(sysclk_get_cpu_hz() / 1000); // 1 ms
@@ -141,6 +145,7 @@ int main (void)
 	char button1 = '0';
 	char eof = 'X';
 	char buffer[1024];
+	char butID = '1';
 	
 	while(1) {
 		if(pio_get(PIOA, PIO_INPUT, PIO_PA11) == 0) {
@@ -155,6 +160,8 @@ int main (void)
 				}
 			}
 		
+		while(!usart_is_tx_ready(UART_COMM));
+		usart_write(UART_COMM, butID);
 		while(!usart_is_tx_ready(UART_COMM));
 		usart_write(UART_COMM, button1);
 		while(!usart_is_tx_ready(UART_COMM));
